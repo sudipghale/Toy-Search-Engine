@@ -16,7 +16,7 @@ norm_tf_idf = {}
 postings_list = {} # (doc d, TF-IDF w)
 
 
-corpusroot = './test'
+corpusroot = './presidential_debates'
 tokenizer = RegexpTokenizer(r'[a-zA-Z]+') 
 stemmer = PorterStemmer()
 stop_words_eng = stopwords.words("english")
@@ -32,16 +32,12 @@ for filename in os.listdir(corpusroot):
     tf_token[filename] = tf_tok.copy()
     df_token = df_token + Counter(set(tokens))
 
-#print(tf_token)
-#print(df_token)    
-
 #* getidf(token): return the inverse document frequency of a token. If the token doesn't exist in the corpus, return -1. 
 # The parameter 'token' is already stemmed. (It means you should not perform stemming inside this function.) Note the 
 # differences between getidf("hispan") and getidf("hispanic"). 
 
 def getidf(token):
     n = len(tf_token) # total numbe of documents
-  #  print("N is =", n)
     if df_token[token] == 0: # if token is not not in any documents
         return -1
     else:
@@ -60,14 +56,12 @@ def get_cosine_length(filename):
         cosine_length += get_tf_idf_weight(filename, token) * get_tf_idf_weight(filename, token)    
     return math.sqrt(cosine_length)
         
-def make_norm_tf_idf():
+def make_norm_tf_idf(): 
     for filename in tf_token:
         norm_tf_idf[filename] = Counter()
         cosine_length = get_cosine_length(filename)
-       # print("cos lengh ===", cosine_length)
         for token in tf_token[filename]:
             if cosine_length != 0:
-              #  print("tfidf and cos len of {}  is {}{} ", token, get_tf_idf_weight(filename,token),cosine_length)
                 norm_tf_idf[filename][token] = get_tf_idf_weight(filename,token)/cosine_length
             else:
                 print("cosine_length is ZERO")
@@ -80,23 +74,11 @@ def make_norm_tf_idf():
 def getweight(filename, token): #tf-idf weight
     make_norm_tf_idf()
     if any(token in word for word in tf_token[filename]):        
-        #print("token found in doc with tf-idf score")
         return norm_tf_idf[filename][token]
     else:
         return 0
-        
-            
-"""
-def print_tf_idf(filename, doc_fre):
-    for tok in doc_fre:
-        print("tf-idf of", tok,"is", getweight(filename, tok));
-        print_tf_idf("file1.txt", df_token)
 
 
-  """
-#getweight("file2.txt", "septemb")
-#print("the norm_tf_idf is",norm_tf_idf)
- 
 def make_norm_query_vec(q_vec,q_cos_length):
     q_vec_norm ={}
     for token in q_vec:
@@ -110,6 +92,14 @@ def make_posting_list():
             if token not in postings_list:
                 postings_list[token]= Counter()
             postings_list[token][file] = norm_tf_idf[file][token]
+            
+def purity_doc(doc, top_ten_doc):
+    for token in top_ten_doc:
+        if doc not in top_ten_doc[token]:
+            return 0                 
+    return 1
+            
+        
 
 
 #*query(qstring): return a tuple in the form of (filename of the document, score), where the document is the query answer with respect 
@@ -131,39 +121,47 @@ def query(qstring):
         token_stem = stemmer.stem(token)
         if token_stem not in postings_list: #If the token 𝑡 doesn't exist in the corpus, ignore it.
             continue
-        top_ten_doc[token_stem]= postings_list[token_stem].most_common(10)  #For each token 𝑡 in the query, return the top-10 elements in its corresponding postings list
-        upper_bounds[token_stem]=top_ten_doc[token_stem][-1]
+        top_ten_doc[token_stem], bound_wt = zip(*postings_list[token].most_common(10))  #For each token 𝑡 in the query, return the top-10 elements in its corresponding postings list
+        upper_bounds[token_stem]=bound_wt[9]
 
         q_vec[token_stem] = 1+ math.log10(qstring.count(token))
         q_cos_length += q_vec[token_stem]* q_vec[token_stem]
     q_cos_length = math.sqrt(q_cos_length)  
       
     q_vec_norm = make_norm_query_vec(q_vec,q_cos_length)    
-   # print("q_vec",q_vec_norm)
-    print("tfidf:",norm_tf_idf)
-    
-    print("posting list= ",postings_list)
-    print("top 10 ", top_ten_doc)
-    print("10th e", upper_bounds)
+
+
     
     for doc in norm_tf_idf:
-        sim = 0
+        sim = 0.0
         for tok in top_ten_doc:
             if doc in top_ten_doc[tok]:
-                sim+= q_vec_norm[tok] * postings_list[tok][file]
+                sim += (q_vec[tok]/q_cos_length) * postings_list[tok][doc]
             else:
-                sim += q_vec_norm[tok] #* upper_bounds[tok][doc]
+                sim = sim+ q_vec[tok]/q_cos_length * upper_bounds[tok]
         cosine_similarity[doc] = sim
     
-    print("cos sim", cosine_similarity)
-            
+    best_doc = cosine_similarity.most_common(1)
+    
+    document, weight = zip(*best_doc)
+    doc = document[0]
+    
+    if best_doc ==0:
+        return "None", 0.0000000
+    elif purity_doc(document[0],top_ten_doc):
+        return doc, weight[0]
+  
+    else:
+        return "Fetch more", 0
+              
     
     
-    
-query("november december")
    
+print("(%s, %.12f)" % query("terror attack"))
 
 '''
+query("november december")
+
 print ("idf of reason =%.12f" %getidf("reason"))
 print ("idf of hispan =%.12f" %getidf("hispan"))
 print ("idf of hispanic =%.12f" %getidf("hispanic"))
