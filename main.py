@@ -16,7 +16,7 @@ norm_tf_idf = {}
 postings_list = {} # (doc d, TF-IDF w)
 
 
-corpusroot = './presidential_debates'
+corpusroot = './test'
 tokenizer = RegexpTokenizer(r'[a-zA-Z]+') 
 stemmer = PorterStemmer()
 stop_words_eng = stopwords.words("english")
@@ -106,10 +106,11 @@ def make_norm_query_vec(q_vec,q_cos_length):
 
 def make_posting_list():
     for file in norm_tf_idf:
-        postings_list[file] = Counter()
         for  token in norm_tf_idf[file]:
             if token not in postings_list:
-                postings_list[file][token]=norm_tf_idf[file][token]
+                postings_list[token]= Counter()
+            postings_list[token][file] = norm_tf_idf[file][token]
+
 
 #*query(qstring): return a tuple in the form of (filename of the document, score), where the document is the query answer with respect 
 # to "qstring" . If no document contains any token in the query, return ("None",0). If we need more than 10 elements from each posting list,
@@ -117,23 +118,49 @@ def make_posting_list():
 def query(qstring):
     q_cos_length = 0
     q_vec = {}
+    top_ten_doc = {}
+    upper_bounds={}
+    cosine_similarity = Counter()
     
     qstring.lower()
-    
+    make_norm_tf_idf()
+    make_posting_list()
+
+
     for token in qstring.split():
         token_stem = stemmer.stem(token)
+        if token_stem not in postings_list: #If the token 𝑡 doesn't exist in the corpus, ignore it.
+            continue
+        top_ten_doc[token_stem]= postings_list[token_stem].most_common(10)  #For each token 𝑡 in the query, return the top-10 elements in its corresponding postings list
+        upper_bounds[token_stem]=top_ten_doc[token_stem][-1]
+
         q_vec[token_stem] = 1+ math.log10(qstring.count(token))
         q_cos_length += q_vec[token_stem]* q_vec[token_stem]
     q_cos_length = math.sqrt(q_cos_length)  
       
     q_vec_norm = make_norm_query_vec(q_vec,q_cos_length)    
-    print("q_vec",q_vec_norm)
-    #print("tfidf:",norm_tf_idf)
+   # print("q_vec",q_vec_norm)
+    print("tfidf:",norm_tf_idf)
     
-    make_posting_list()
     print("posting list= ",postings_list)
+    print("top 10 ", top_ten_doc)
+    print("10th e", upper_bounds)
     
-query("particular constitutional amendment")
+    for doc in norm_tf_idf:
+        sim = 0
+        for tok in top_ten_doc:
+            if doc in top_ten_doc[tok]:
+                sim+= q_vec_norm[tok] * postings_list[tok][file]
+            else:
+                sim += q_vec_norm[tok] #* upper_bounds[tok][doc]
+        cosine_similarity[doc] = sim
+    
+    print("cos sim", cosine_similarity)
+            
+    
+    
+    
+query("november december")
    
 
 '''
@@ -153,5 +180,3 @@ print("%.12f" % getweight("2012-10-16.txt","hispanic"))
     
     
     
-    
-
