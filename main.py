@@ -1,9 +1,6 @@
 """
-Sudip Ghale
-ID: 1001557881
-netID:2xg7881
-CSE-4334-002
-Data Mining: Lab01
+Autho @Sudip Ghale
+
 """
 
 '''
