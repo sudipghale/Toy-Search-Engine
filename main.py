@@ -151,23 +151,52 @@ def query(qstring):
         return "Fetch more", 0 #If we need more than 10 elements from each posting list, return ("fetch more",0).
               
 # test cases to evaluate the correctness of the program, side commands are expected values
-print("%.12f" % getidf("health")) # 0.079181246048
-print("%.12f" % getidf("agenda")) #0.363177902413
-print("%.12f" % getidf("vector")) #-1.000000000000
-print("%.12f" % getidf("reason")) #0.000000000000
-print("%.12f" % getidf("hispan")) #0.632023214705
-print("%.12f" % getidf("hispanic")) #-1.000000000000
-print("%.12f" % getweight("2012-10-03.txt","health")) #0.008528366190
-print("%.12f" % getweight("1960-10-21.txt","reason")) #0.000000000000
-print("%.12f" % getweight("1976-10-22.txt","agenda")) #0.012683891289
-print("%.12f" % getweight("2012-10-16.txt","hispan")) #0.023489163449
-print("%.12f" % getweight("2012-10-16.txt","hispanic")) #0.000000000000
-print("(%s, %.12f)" % query("health insurance wall street")) #(2012-10-03.txt, 0.033877975254)
-print("(%s, %.12f)" % query("particular constitutional amendment")) #(fetch more, 0.000000000000)
-print("(%s, %.12f)" % query("terror attack")) #(2004-09-30.txt, 0.026893338131)
-print("(%s, %.12f)" % query("vector entropy")) #(None, 0.000000000000)
+#print("%.12f" % getidf("health")) # 0.079181246048
+#print("%.12f" % getidf("agenda")) #0.363177902413
+#print("%.12f" % getidf("vector")) #-1.000000000000
+#print("%.12f" % getidf("reason")) #0.000000000000
+#print("%.12f" % getidf("hispan")) #0.632023214705
+#print("%.12f" % getidf("hispanic")) #-1.000000000000
+#print("%.12f" % getweight("2012-10-03.txt","health")) #0.008528366190
+#print("%.12f" % getweight("1960-10-21.txt","reason")) #0.000000000000
+#print("%.12f" % getweight("1976-10-22.txt","agenda")) #0.012683891289
+#print("%.12f" % getweight("2012-10-16.txt","hispan")) #0.023489163449
+#print("%.12f" % getweight("2012-10-16.txt","hispanic")) #0.000000000000
+#print("(%s, %.12f)" % query("health insurance wall street")) #(2012-10-03.txt, 0.033877975254)
+#print("(%s, %.12f)" % query("particular constitutional amendment")) #(fetch more, 0.000000000000)
+#print("(%s, %.12f)" % query("terror attack")) #(2004-09-30.txt, 0.026893338131)
+#print("(%s, %.12f)" % query("vector entropy")) #(None, 0.000000000000)
 
-
+print("%.12f" % getidf("reason"))
+#0.000000000000
+print("%.12f" % getidf("hispan"))
+#0.632023214705
+print("%.12f" % getidf('andropov'))
+#1.477121254720
+print("%.12f" % getidf('identifi'))
+#0.330993219041
+print("%.12f" % getidf('998'))
+#-1.000000000000
+print("%.12f" % getweight('1960-09-26.txt','accomplish'))
+#0.012765709568
+print("%.12f" % getweight('1960-10-07.txt','andropov'))
+#0.000000000000
+print("%.12f" % getweight('1960-10-13.txt','identifi'))
+#0.013381177224
+print("%.12f" % getweight('1976-10-22.txt','institut'))
+#0.006927937352
+print("%.12f" % getweight('1996-10-16.txt','latvia'))
+#0.000000000000
+print("(%s, %.12f)" % query("health insurance wall street"))
+#(2012-10-03.txt, 0.033877975254)
+print("(%s, %.12f)" % query("particular constitutional amendment"))
+#(fetch more, 0.000000000000)
+print("(%s, %.12f)" % query("terror attack"))
+#(2004-09-30.txt, 0.026893338131)
+print("(%s, %.12f)" % query("vector entropy"))
+#(None, 0.000000000000)
+#print("(%s, %.12f)" % query("Governor Dukakis"))
+#(1988-10-13.txt, 0.068798757875)
 
     
     
